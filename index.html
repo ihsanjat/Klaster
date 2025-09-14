@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Single Page dengan Fetch + Transisi + Menu Aktif + History</title>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    nav { background: #333; padding: 10px; position: sticky; top: 0; }
+    nav a {
+      color: white;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 4px;
+    }
+    nav a:hover {
+      background: #555;
+    }
+    nav a.active {
+      background: #ff9800;
+      color: black;
+    }
+
+    #content {
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.5s ease-in-out;
+    }
+    #content.show {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#Home" onclick="navigate('index.html', this)">Beranda</a>
+    <a href="#Clustering 3D Plot" onclick="navigate('clustering_3d_plot.html', this)">Tentang</a>
+    <a href="#Cluster by Total Pelopor" onclick="navigate('kode_vs_tot_pelopor_cluster.html', this)">Layanan</a>
+    <a href="#Cluster by Total Utama" onclick="navigate('kode_vs_tot_ut_cluster.html', this)">Kontak</a>
+  </nav>
+
+  <div id="content">
+    <!-- Isi halaman akan muncul di sini -->
+  </div>
+
+  <script>
+    async function loadPage(page, element, push = true) {
+      const content = document.getElementById("content");
+
+      // Hapus highlight di semua menu
+      document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
+
+      // Tambahkan highlight di menu yang dipilih
+      if (element) element.classList.add("active");
+
+      // Fade out konten lama
+      content.classList.remove("show");
+
+      setTimeout(async () => {
+        try {
+          const res = await fetch(page);
+          const html = await res.text();
+          content.innerHTML = html;
+        } catch (e) {
+          content.innerHTML = "<p style='color:red'>Gagal memuat halaman: " + page + "</p>";
+        }
+
+        // Fade in konten baru
+        requestAnimationFrame(() => {
+          content.classList.add("show");
+        });
+      }, 300);
+
+      // Update riwayat browser
+      if (push) {
+        history.pushState({ page, menu: element ? element.textContent : "" }, "", element?.getAttribute("href") || "#");
+      }
+    }
+
+    function navigate(page, element) {
+      loadPage(page, element, true);
+      return false; // cegah reload default
+    }
+
+    // Tangani tombol Back/Forward browser
+    window.addEventListener("popstate", (event) => {
+      if (event.state) {
+        // Cari menu yang sesuai hash
+        let link = [...document.querySelectorAll("nav a")].find(a => a.getAttribute("href") === location.hash);
+        loadPage(event.state.page, link, false);
+      }
+    });
+
+    // Muat halaman default berdasarkan URL hash atau index.html
+    window.addEventListener("DOMContentLoaded", () => {
+      let hash = location.hash || "#home";
+      let link = [...document.querySelectorAll("nav a")].find(a => a.getAttribute("href") === hash);
+      let page = "index.html";
+      if (hash === "#Clustering 3D Plot") page = "clustering_3d_plot.html";
+      if (hash === "#Cluster by Total Pelopor") page = "services.html";
+      if (hash === "#Cluster by Total Utama") page = "kode_vs_tot_ut_cluster.html";
+      loadPage(page, link, false);
+    });
+  </script>
+
+</body>
+</html>
+
