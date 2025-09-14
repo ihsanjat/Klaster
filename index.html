@@ -37,9 +37,9 @@
 
   <nav>
     <a href="#Home" onclick="navigate('index.html', this)">Beranda</a>
-    <a href="#Clustering 3D Plot" onclick="navigate('clustering_3d_plot.html', this)">Klaster 3D</a>
-    <a href="#Cluster by Total Pelopor" onclick="navigate('kode_vs_tot_pelopor_cluster.html', this)">Cluster by Total Pelopor</a>
-    <a href="#Cluster by Total Utama" onclick="navigate('kode_vs_tot_ut_cluster.html', this)">Cluster by Total Utama</a>
+    <a href="#3d" onclick="navigate('clustering_3d_plot.html', this)">Cluster 3D</a>
+    <a href="#pelopor" onclick="navigate('kode_vs_tot_pelopor_cluster.html', this)">Cluster by Total Pelopor</a>
+    <a href="#utama" onclick="navigate('kode_vs_tot_ut_cluster.html', this)">Cluster by Total Utama</a>
   </nav>
 
   <div id="content">
@@ -99,9 +99,9 @@
       let hash = location.hash || "#home";
       let link = [...document.querySelectorAll("nav a")].find(a => a.getAttribute("href") === hash);
       let page = "index.html";
-      if (hash === "#Clustering 3D Plot") page = "clustering_3d_plot.html";
-      if (hash === "#Cluster by Total Pelopor") page = "kode_vs_tot_pelopor_cluster.html";
-      if (hash === "#Cluster by Total Utama") page = "kode_vs_tot_ut_cluster.html";
+      if (hash === "#3d") page = "clustering_3d_plot.html";
+      if (hash === "#pelopor") page = "kode_vs_tot_pelopor_cluster.html";
+      if (hash === "#utama") page = "kode_vs_tot_ut_cluster.html";
       loadPage(page, link, false);
     });
   </script>
