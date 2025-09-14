@@ -5,7 +5,12 @@
   <title>Klaster Kota Kabupaten</title>
   <style>
     body { margin: 0; font-family: Arial, sans-serif; }
-    nav { background: #333; padding: 10px; position: sticky; top: 0; }
+    nav {
+      background: #333;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+    }
     nav a {
       color: white;
       margin: 0 15px;
@@ -15,97 +20,80 @@
       padding: 8px 12px;
       border-radius: 4px;
     }
-    nav a:hover {
-      background: #555;
-    }
-    nav a.active {
-      background: #ff9800;
-      color: black;
-    }
+    nav a:hover { background: #555; }
+    nav a.active { background: #ff9800; color: black; }
 
-    #content {
-      padding: 20px;
+    iframe {
+      width: 100%;
+      height: 90vh;
+      border: none;
       opacity: 0;
       transition: opacity 0.5s ease-in-out;
+      position: absolute;
+      left: 0;
+      top: 50px; /* biar nggak ketutup navbar */
+      display: none;
     }
-    #content.show {
+    iframe.active {
+      display: block;
       opacity: 1;
+      position: relative;
+      top: 0;
+    }
+
+    /* Supaya container iframe bisa menyesuaikan */
+    .iframe-container {
+      position: relative;
+      width: 100%;
+      height: 90vh;
+      overflow: hidden;
     }
   </style>
 </head>
 <body>
 
   <nav>
-    <a href="#Home" onclick="navigate('index.html', this)">Beranda</a>
-    <a href="#3d" onclick="navigate('clustering_3d_plot.html', this)">Cluster 3D</a>
-    <a href="#pelopor" onclick="navigate('kode_vs_tot_pelopor_cluster.html', this)">Cluster by Total Pelopor</a>
-    <a href="#utama" onclick="navigate('kode_vs_tot_ut_cluster.html', this)">Cluster by Total Utama</a>
+    <a onclick="showPage('home', this)" class="active">3D Cluster</a>
+    <a onclick="showPage('pelopor', this)">by Pelopor</a>
+    <a onclick="showPage('utama', this)">by Utama</a>
+    <a onclick="showPage('dewasa', this)">by Dewasa</a>
+    <a onclick="showPage('madya', this)">by Madya</a>
   </nav>
 
-  <div id="content">
-    <!-- Isi halaman akan muncul di sini -->
+  <div class="iframe-container">
+    <iframe id="home" src="clustering_3d_plot.html" class="active"></iframe>
+    <iframe id="pelopor" src="kode_vs_tot_pelopor_cluster.html"></iframe>
+    <iframe id="utama" src="kode_vs_tot_ut_cluster.html"></iframe>
+    <iframe id="dewasa" src="kode_vs_tot_dw_cluster.html"></iframe>
+    <iframe id="madya" src="kode_vs_tot_md_cluster.html"></iframe>
   </div>
 
   <script>
-    async function loadPage(page, element, push = true) {
-      const content = document.getElementById("content");
+    function showPage(pageId, element) {
+      const current = document.querySelector("iframe.active");
+      const next = document.getElementById(pageId);
 
-      // Hapus highlight di semua menu
+      if (current === next) return; // kalau klik halaman yang sama, abaikan
+
+      // Hilangkan highlight lama
       document.querySelectorAll("nav a").forEach(a => a.classList.remove("active"));
-
-      // Tambahkan highlight di menu yang dipilih
       if (element) element.classList.add("active");
 
-      // Fade out konten lama
-      content.classList.remove("show");
-
-      setTimeout(async () => {
-        try {
-          const res = await fetch(page);
-          const html = await res.text();
-          content.innerHTML = html;
-        } catch (e) {
-          content.innerHTML = "<p style='color:red'>Gagal memuat halaman: " + page + "</p>";
-        }
-
-        // Fade in konten baru
-        requestAnimationFrame(() => {
-          content.classList.add("show");
-        });
-      }, 300);
-
-      // Update riwayat browser
-      if (push) {
-        history.pushState({ page, menu: element ? element.textContent : "" }, "", element?.getAttribute("href") || "#");
+      if (current) {
+        // Fade out iframe lama
+        current.classList.remove("active");
+        setTimeout(() => {
+          current.style.display = "none";
+        }, 500); // setelah transisi selesai, baru sembunyikan
       }
+
+      // Tampilkan iframe baru dengan fade in
+      next.style.display = "block";
+      requestAnimationFrame(() => {
+        next.classList.add("active");
+      });
     }
-
-    function navigate(page, element) {
-      loadPage(page, element, true);
-      return false; // cegah reload default
-    }
-
-    // Tangani tombol Back/Forward browser
-    window.addEventListener("popstate", (event) => {
-      if (event.state) {
-        // Cari menu yang sesuai hash
-        let link = [...document.querySelectorAll("nav a")].find(a => a.getAttribute("href") === location.hash);
-        loadPage(event.state.page, link, false);
-      }
-    });
-
-    // Muat halaman default berdasarkan URL hash atau index.html
-    window.addEventListener("DOMContentLoaded", () => {
-      let hash = location.hash || "#home";
-      let link = [...document.querySelectorAll("nav a")].find(a => a.getAttribute("href") === hash);
-      let page = "index.html";
-      if (hash === "#3d") page = "clustering_3d_plot.html";
-      if (hash === "#pelopor") page = "kode_vs_tot_pelopor_cluster.html";
-      if (hash === "#utama") page = "kode_vs_tot_ut_cluster.html";
-      loadPage(page, link, false);
-    });
   </script>
 
 </body>
 </html>
-
